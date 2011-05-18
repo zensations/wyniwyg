@@ -1,0 +1,24 @@
+<?php
+/**
+ * Implements hook_filter_info().
+ */
+function wyniwyg_filter_info() {
+  $filters['filter_wyniwyg'] = array(
+    'title' => t('Wyniwyg'),
+    'description' => t('Extended Markdown with Drupal flavor.'),
+    'process callback' => '_wyniwyg_process',
+  );
+  return $filters;
+}
+
+/**
+ * Main process callback.
+ */
+function _drupdown_process($text, $filter, $format, $langcode, $cache, $cache_id) {
+  $wyniwyg = new Wyniwyg_Parser();
+  return $wyniwyg->transform($text);
+}
+
+require_once "markdown.php";
+class Wyniwyg_Parser extends MarkdownExtra_Parser {
+}

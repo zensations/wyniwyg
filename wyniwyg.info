@@ -1,0 +1,7 @@
+; $Id$
+name = Wyniwyg
+description = "Wyniwyg input system."
+package = Content
+version = 0.1
+core = 7.x
+files[] = wyniwyg.module
