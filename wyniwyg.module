@@ -19,6 +19,6 @@ function _drupdown_process($text, $filter, $format, $langcode, $cache, $cache_id
   return $wyniwyg->transform($text);
 }
 
-require_once "markdown.php";
+require_once "markdown/markdown.php";
 class Wyniwyg_Parser extends MarkdownExtra_Parser {
 }
