@@ -1,0 +1,25 @@
+/* BASIC IMAGE STYLES */
+img.wyniwyg {
+  display:block;
+  margin:1em auto;
+}
+
+img.left {
+  margin:0.5em 0.5em 0.5em 0;
+  float:left;
+}
+
+img.right {
+  margin:0.5em 0em 0.5em 0.5em;
+  float:right;
+}
+
+pre {
+  clear:both;
+}
+
+.wyniwyg-video {
+  display:block;
+  margin:auto;
+  z-index:-1000;
+}

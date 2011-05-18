@@ -1,5 +1,13 @@
 <?php
 /**
+ * Implements hook_init().
+ */
+function wyniwyg_init() {
+  drupal_add_css(drupal_get_path('module', 'wyniwyg') . '/wyniwyg.css');
+  drupal_add_js(drupal_get_path('module', 'wyniwyg') . '/wyniwyg.js');
+}
+
+/**
  * Implements hook_filter_info().
  */
 function wyniwyg_filter_info() {
@@ -14,11 +22,173 @@ function wyniwyg_filter_info() {
 /**
  * Main process callback.
  */
-function _drupdown_process($text, $filter, $format, $langcode, $cache, $cache_id) {
+function _wyniwyg_process($text, $filter, $format, $langcode, $cache, $cache_id) {
   $wyniwyg = new Wyniwyg_Parser();
   return $wyniwyg->transform($text);
 }
 
-require_once "markdown.php";
+function wyniwyg_get_commands() {
+  $commands = &drupal_static(__FUNCTION__);
+  if (!isset($commands)) {
+    $commands = module_invoke_all('wyniwyg_commands');
+    drupal_alter('wyniwyg_commands', $commands);
+  }
+  return $commands;
+}
+
+require_once "markdown/markdown.php";
+
+/**
+ * Wyniwyg parser class, derived from MarkdownExtra_Parser.
+ */
 class Wyniwyg_Parser extends MarkdownExtra_Parser {
+  function Wyniwyg_Parser() {
+    $this->span_gamut += array(
+      'doDrupalHooks' => 0,
+    );
+    parent::MarkdownExtra_Parser();
+  }
+
+  function doDrupalHooks($text) {
+    $commands = wyniwyg_get_commands();
+    foreach ($commands as $command) {
+      if (array_key_exists('pattern', $command) && array_key_exists('callback', $command)) {
+        $pattern = $command['pattern'];
+        $callback = array(&$this, 'wyniwyg__' . $command['callback']);
+        $text = preg_replace_callback($pattern, $callback, $text);
+      }
+      else {
+        drupal_set_message(t('Invalid WYNIWYG command %command.
+          At least pattern and callback have to be defined.', array('%command' => $key), FALSE));
+      }
+    }
+    return $text;
+  }
+
+  function __call($name, $arguments) {
+    list($prefix, $hook) = explode('__', $name); 
+    return $this->hashPart(call_user_func($hook, $arguments[0]));
+  }
+
+	function doHardBreaks($text) {
+		# Do hard breaks:
+		return preg_replace_callback('/\n/', 
+			array(&$this, '_doHardBreaks_callback'), $text);
+	}
+}
+
+/**
+ * Implements hook_wyniwyg_commands().
+ */
+function wyniwyg_wyniwyg_commands() {
+  $commands = array();
+  $commands['image'] = array(
+    'pattern' => '/\!\[(?<alt>.*)\]\s*\((?<fid>[0-9]+)\s*\"(?<title>.*)\"\)\s*\{(?<classes>.*)\s*\}/',
+    'callback' => 'wyniwyg_insert_image',
+  );
+  $commands['video'] = array(
+    'pattern' => '/\:\[(?<title>.*)\]\s*\((?<url>.*)\)/',
+    'callback' => 'wyniwyg_insert_video',
+  );
+  return $commands;
+}
+
+/**
+ * Wyniwyg image callback.
+ */
+function wyniwyg_insert_image($matches) {
+  $style = variable_get('wyniwyg_default_image_style', 'medium');
+  $token = strtok($matches['classes'], ' ,');
+  $classes = array();
+  $image_styles = image_styles();
+  while ($token) {
+    $classes[] = $token;
+    if (array_key_exists($token, $image_styles)) {
+      $style = $token;
+    }
+    $token = strtok(' ,');
+  }
+  $classes_str = implode(' ', $classes);
+  $file = file_load($matches['fid']);
+  $image = image_load($file->uri);
+  if (empty($file) || empty($image)) {
+    return '';
+  }
+  $path = FALSE;
+  $original = FALSE;
+  if (!$style) {
+    $original = FALSE;
+    $path = $image->source;
+  }
+  else {
+    $original = $image->source;
+    $path = image_style_path($style, $image->source);
+    if (!file_exists($path)) {
+      image_style_create_derivative($image_styles[$style], $image->source, $path);
+    }
+    $oinfo = image_get_info($original);
+    $sinfo = image_get_info($path);
+    if ($oinfo['width']*$oinfo['height'] < $sinfo['width']*$sinfo['height']*4) {
+      $original = FALSE;
+    }
+  }
+  $result = theme('image_style', array(
+    'style_name' => $style,
+    'path' => $path,
+    'alt' => $matches['alt'],
+    'title' => $matches['title'],
+    'attributes' => array('class' => array('wyniwyg-image')),
+  ));
+  if ($original) {
+    $result = l($result, file_create_url($original), array(
+      'html' => TRUE,
+      'attributes' => array('class' => array('colorbox', 'wyniwyg-image-link')),
+    ));
+  }
+  return $result;
+}
+
+/**
+ * Wyniwyg video callback.
+ */
+function wyniwyg_insert_video($matches) {
+  if (trim($matches['title']) == '') {
+    $matches['title'] = $matches['url'];
+  }
+  return l($matches['title'], $matches['url'], array(
+    'attributes' => array('class' => array('wyniwyg-video')),
+  ));
+}
+
+//==============================================================================
+// ALTER FORM ELEMENTS
+//==============================================================================
+/**
+ * Implements hook_element_info_alter().
+ */
+function wyniwyg_element_info_alter(&$types) {
+  $types['managed_file']['#after_build'][] = 'wyniwyg_image_element_process';
+}
+
+/**
+ * Process function for managed file fields.
+ */
+function wyniwyg_image_element_process($element) {
+  if (!isset($element['#entity_type']) || $element['#field_name'] != 'field_images') {
+    return $element;
+  }
+  if ($element['fid']['#value'] > 0) {
+    $element['alt']['#required'] = TRUE;
+    $element['alt']['#attributes']['class'] = array('image-alt');
+    $element['title']['#attributes']['class'] = array('image-title');
+    $snippet = '![' . $element['alt']['#value'] . '](' . $element['fid']['#value'] . ' "' . $element['title']['#value'] . '"){center}';
+    $element['insert_path'] = array(
+      '#markup' => '<pre class="insert-path">' . $snippet . '</pre>',
+      '#weight' => -9,
+    );
+    $element['file_id'] = array(
+      '#markup' => '<div class="file-id" style="display:none">' . $element['fid']['#value'] . '</div>',
+    );
+  }
+  return $element;
 }
