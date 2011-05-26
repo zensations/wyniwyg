@@ -1,6 +1,7 @@
 (function ($) {
   Drupal.behaviors.wyniwyg = {
     attach: function(context, settings) {
+      // ==== embedded videos ====
       $('a.wyniwyg-video').each(function () {
         var url = $(this).attr('href');
         var title = $(this).attr('title');
@@ -15,11 +16,12 @@
         }
       });
 
-      // include snipped for images
+      // ==== image include snippets ====
       $('.field-name-field-images input[type=text]').change(function(){
         var field = $(this).parent().parent();
         $('pre', field).text('![' + $('.image-alt', field).val() + '](' + $('.file-id', field).text() + ' "' + $('.image-title', field).val() + '"){center}')
       });
+      // ==== markitup ====
     }
   }
 })(jQuery);

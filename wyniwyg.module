@@ -51,7 +51,7 @@ class Wyniwyg_Parser extends MarkdownExtra_Parser {
 
   function doDrupalHooks($text) {
     $commands = wyniwyg_get_commands();
-    foreach ($commands as $command) {
+    foreach ($commands as $c => $command) {
       if (array_key_exists('pattern', $command) && array_key_exists('callback', $command)) {
         $pattern = $command['pattern'];
         $callback = array(&$this, 'wyniwyg__' . $command['callback']);
@@ -132,12 +132,13 @@ function wyniwyg_insert_image($matches) {
       $original = FALSE;
     }
   }
+  $classes[] = 'wyniwyg-image';
   $result = theme('image_style', array(
     'style_name' => $style,
     'path' => $path,
     'alt' => $matches['alt'],
     'title' => $matches['title'],
-    'attributes' => array('class' => array('wyniwyg-image')),
+    'attributes' => array('class' => $classes),
   ));
   if ($original) {
     $result = l($result, file_create_url($original), array(
@@ -163,11 +164,43 @@ function wyniwyg_insert_video($matches) {
 //==============================================================================
 // ALTER FORM ELEMENTS
 //==============================================================================
+
 /**
  * Implements hook_element_info_alter().
  */
 function wyniwyg_element_info_alter(&$types) {
   $types['managed_file']['#after_build'][] = 'wyniwyg_image_element_process';
+  $types['select']['#after_build'][] = 'wyniwyg_select_element_process';
+  //$types['textarea']['#after_build'][] = 'wyniwyg_select_element_process';
+}
+
+function wyniwyg_select_element_process($element) {
+  if (!(array_key_exists('#parents', $element) && is_array($element['#parents']))) {
+    return $element;
+  }
+  $parents = $element['#parents'];
+  $options = $element['#options'];
+  $type = array_pop($parents);
+  $wyniwyg_text_formats = variable_get('wyniwyg_text_formats', array('wyniwyg'));
+  $intersect = array_intersect($wyniwyg_text_formats, array_keys($options));
+  if ($type != 'format' || count($intersect) == 0) {
+    return $element;
+  }
+  drupal_add_js('sites/all/libraries/markitup/markitup/jquery.markitup.js');
+  drupal_add_js(drupal_get_path('module', 'wyniwyg') . '/set/wyniwyg_set.js');
+  drupal_add_css(drupal_get_path('module', 'wyniwyg') . '/set/wyniwyg_set.css');
+  drupal_add_css(drupal_get_path('module', 'wyniwyg') . '/skin/wyniwyg_skin.css');
+  $id = $element['#id'];
+  $target = 'textarea#edit-' . implode('-', $parents) . '-value';
+  $element['#attached']['js'][] = array(
+    'data' => '
+      jQuery(document).ready(function() {
+        jQuery("' . $target . '").once().markItUp(wyniwyg_markitup_settings);
+      });
+    ',
+    'type' => 'inline'
+  );
+  return $element;
 }
 
 /**
