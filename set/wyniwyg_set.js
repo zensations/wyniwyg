@@ -28,8 +28,8 @@ wyniwyg_markitup_settings = {
 		{name:'Numeric List', openWith:function(markItUp) {
 			return markItUp.line+'. ';
 		}},
-		{separator:'---------------' },
-		{name:'Picture', key:'P', replaceWith:'![[![Alternative text]!]]([![Url:!:http://]!] "[![Title]!]")'},
+    {separator:'---------------' },
+    //{name:'Picture', key:'P', replaceWith:'![[![Alternative text]!]]([![Url/File ID]!] "[![Title]!]")'},
 		{name:'Link', key:'L', openWith:'[', closeWith:']([![Url:!:http://]!] "[![Title]!]")', placeHolder:'Your text to link here...' },
 		{separator:'---------------'},	
 		{name:'Quotes', openWith:'> '},
@@ -40,7 +40,7 @@ wyniwyg_markitup_settings = {
 miu = {
 	markdownTitle: function(markItUp, char) {
 		heading = '';
-		n = $.trim(markItUp.selection||markItUp.placeHolder).length;
+		n = jQuery.trim(markItUp.selection||markItUp.placeHolder).length;
 		for(i = 0; i < n; i++) {
 			heading += char;
 		}

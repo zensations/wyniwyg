@@ -1,6 +1,13 @@
 (function ($) {
   Drupal.behaviors.wyniwyg = {
     attach: function(context, settings) {
+      // === external links ===
+      $('a').click(function() {
+        if (($(this).attr('href').indexOf('http://') > -1) && ($(this).attr('href').indexOf(window.location.host) == -1)) {
+          window.open($(this).attr('href'));
+          return false;
+        }
+      });
       // ==== embedded videos ====
       $('a.wyniwyg-video').each(function () {
         var url = $(this).attr('href');
@@ -21,7 +28,6 @@
         var field = $(this).parent().parent();
         $('pre', field).text('![' + $('.image-alt', field).val() + '](' + $('.file-id', field).text() + ' "' + $('.image-title', field).val() + '"){center}')
       });
-      // ==== markitup ====
     }
   }
 })(jQuery);

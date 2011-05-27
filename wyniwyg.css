@@ -5,13 +5,20 @@ img.wyniwyg {
 }
 
 img.left {
-  margin:0.5em 0.5em 0.5em 0;
+  margin:0em 0.5em 0.5em 0;
   float:left;
 }
 
 img.right {
-  margin:0.5em 0em 0.5em 0.5em;
+  margin:0em 0em 0.5em 0.5em;
   float:right;
+}
+
+
+img.center {
+  margin:1em 0em 1em 0em;
+  display:block;
+  margin:auto;
 }
 
 pre {

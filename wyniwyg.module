@@ -143,7 +143,10 @@ function wyniwyg_insert_image($matches) {
   if ($original) {
     $result = l($result, file_create_url($original), array(
       'html' => TRUE,
-      'attributes' => array('class' => array('colorbox', 'wyniwyg-image-link')),
+      'attributes' => array(
+        'class' => array('colorbox', 'wyniwyg-image-link'),
+        'title' => $matches['title'],
+      ),
     ));
   }
   return $result;
@@ -192,6 +195,7 @@ function wyniwyg_select_element_process($element) {
   drupal_add_css(drupal_get_path('module', 'wyniwyg') . '/skin/wyniwyg_skin.css');
   $id = $element['#id'];
   $target = 'textarea#edit-' . implode('-', $parents) . '-value';
+  $target .= ', textarea#edit-' . implode('-', $parents) . '-summary';
   $element['#attached']['js'][] = array(
     'data' => '
       jQuery(document).ready(function() {
