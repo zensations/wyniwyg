@@ -30,7 +30,7 @@
           var snippet = '![' + $('.image-alt', widget).val() + '](' + $('.file-id', widget).text() + ' "' + $('.image-title', widget).val() + '")';  
           snippet = snippet + '{' + $('.image-size', widget).val() + ' ' + $('.image-position', widget).val() + '}';
           $('input.image-command', widget).val(snippet); 
-          $('input.image-command', widget).effect('highlight').effect('highlight');//.animate({'border':border},500);
+          $('input.image-command', widget).effect('highlight');
         });
         $('input.image-command', this).click(function() { this.select(); });
       });
