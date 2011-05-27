@@ -24,9 +24,15 @@
       });
 
       // ==== image include snippets ====
-      $('.field-name-field-images input[type=text]').change(function(){
-        var field = $(this).parent().parent();
-        $('pre', field).text('![' + $('.image-alt', field).val() + '](' + $('.file-id', field).text() + ' "' + $('.image-title', field).val() + '"){center}')
+      $('.image-widget-data').each(function() {
+        var widget = this;
+        $('.image-alt, .image-title, .image-size, .image-position', this).change(function() {
+          var snippet = '![' + $('.image-alt', widget).val() + '](' + $('.file-id', widget).text() + ' "' + $('.image-title', widget).val() + '")';  
+          snippet = snippet + '{' + $('.image-size', widget).val() + ' ' + $('.image-position', widget).val() + '}';
+          $('input.image-command', widget).val(snippet); 
+          $('input.image-command', widget).effect('highlight').effect('highlight');//.animate({'border':border},500);
+        });
+        $('input.image-command', this).click(function() { this.select(); });
       });
     }
   }

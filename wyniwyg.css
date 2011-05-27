@@ -30,3 +30,11 @@ pre {
   margin:auto;
   z-index:-1000;
 }
+
+.image-widget-data .image-size-container,
+.image-widget-data .image-position-container,
+.image-widget-data .image-command-container {
+  float:left;
+  padding-right:20px;
+  margin-bottom:10px;
+}

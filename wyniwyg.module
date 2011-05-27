@@ -211,6 +211,7 @@ function wyniwyg_select_element_process($element) {
  * Process function for managed file fields.
  */
 function wyniwyg_image_element_process($element) {
+  drupal_add_library('system', 'effects.highlight');
   if (!isset($element['#entity_type']) || $element['#field_name'] != 'field_images') {
     return $element;
   }
@@ -218,10 +219,35 @@ function wyniwyg_image_element_process($element) {
     $element['alt']['#required'] = TRUE;
     $element['alt']['#attributes']['class'] = array('image-alt');
     $element['title']['#attributes']['class'] = array('image-title');
-    $snippet = '![' . $element['alt']['#value'] . '](' . $element['fid']['#value'] . ' "' . $element['title']['#value'] . '"){center}';
-    $element['insert_path'] = array(
-      '#markup' => '<pre class="insert-path">' . $snippet . '</pre>',
-      '#weight' => -9,
+    $snippet = '![' . $element['alt']['#value'] . '](' . $element['fid']['#value'] . ' "' . $element['title']['#value'] . '"){medium center}';
+    $element['image_size'] = array(
+      '#prefix' => '<div class="image-size-container">',
+      '#suffix' => '</div>',
+      '#type' => 'select',
+      '#title' => t('Size'),
+      '#options' => array('medium' => t('medium'), 'thumbnail' => t('thumbnail'), 'large' => t('large')),
+      '#weight' => 1,
+      '#attributes' => array('class' => array('image-size')),
+    );
+    $element['image_position'] = array(
+      '#prefix' => '<div class="image-position-container">',
+      '#suffix' => '</div>',
+      '#type' => 'select',
+      '#title' => t('Position'),
+      '#options' => array('center' => t('center'), 'left' => t('left'), 'right' => t('right')),
+      '#weight' => 2,
+      '#attributes' => array('class' => array('image-position')),
+    );
+    $element['image_command'] = array(
+      '#prefix' => '<div class="image-command-container">',
+      '#suffix' => '</div>',
+      '#title' => t('Command'),
+      '#type' => 'textfield',
+      '#value' => $snippet,
+      '#weight' => 3,
+      '#size' => 80,
+      '#description' => t('Copy this command and insert it into the body text.'),
+      '#attributes' => array('class' => array('image-command')),
     );
     $element['file_id'] = array(
       '#markup' => '<div class="file-id" style="display:none">' . $element['fid']['#value'] . '</div>',
