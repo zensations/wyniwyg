@@ -266,7 +266,7 @@ function wyniwyg_noticeme_meta_alter(&$meta) {
   if (!empty($object) && !empty($object->nid)) {
     $l = $object->language;
     $meta['og:title'] = $object->title;
-    if (count($object->field_images) > 0 && !empty($object->field_images[$l][0])) {
+    if (!empty($object->field_images) && count($object->field_images) > 0 && !empty($object->field_images[$l][0])) {
       $meta['og:image'] = image_style_url('thumbnail', $object->field_images[$l][0]['uri']);
     }
     if (!empty($object->body[$l][0]['summary'])) {
