@@ -138,7 +138,10 @@ function wyniwyg_insert_image($matches) {
     'path' => $path,
     'alt' => $matches['alt'],
     'title' => $matches['title'],
-    'attributes' => array('class' => $classes),
+    'attributes' => array(
+      'class' => $classes,
+      'id' => 'wyniwyg-' . $file->fid, 
+    ),
   ));
   if ($original) {
     $result = l($result, file_create_url($original), array(
