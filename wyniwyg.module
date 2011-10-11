@@ -152,6 +152,9 @@ function wyniwyg_insert_image($matches) {
       ),
     ));
   }
+  if (strlen(trim($matches['title'])) > 0) {
+    $result = '<div class="wyniwyg-figure">' . $result . '<div class="wyniwyg-caption">' . $matches['title'] . '</div></div>';
+  }
   return $result;
 }
 
@@ -223,12 +226,17 @@ function wyniwyg_image_element_process($element) {
     $element['alt']['#attributes']['class'] = array('image-alt');
     $element['title']['#attributes']['class'] = array('image-title');
     $snippet = '![' . $element['alt']['#value'] . '](' . $element['fid']['#value'] . ' "' . $element['title']['#value'] . '"){medium center}';
+    $styles = image_styles();
+    $style_options = array();
+    foreach (array_keys($styles) as $style) {
+      $style_options[$style] = $style;
+    }
     $element['image_size'] = array(
       '#prefix' => '<div class="image-size-container">',
       '#suffix' => '</div>',
       '#type' => 'select',
       '#title' => t('Size'),
-      '#options' => array('medium' => t('medium'), 'thumbnail' => t('thumbnail'), 'large' => t('large')),
+      '#options' => $style_options,
       '#weight' => 1,
       '#attributes' => array('class' => array('image-size')),
     );
