@@ -1,21 +1,21 @@
 /* BASIC IMAGE STYLES */
-img.wyniwyg {
+.wyniwyg {
   display:block;
   margin:1em auto;
 }
 
-img.left {
+.wyniwyg-left {
   margin:0.5em 0.5em 0.5em 0;
   float:left;
 }
 
-img.right {
+.wyniwyg-right {
   margin:0.5em 0em 0.5em 0.5em;
   float:right;
 }
 
 
-img.center {
+.wyniwyg-center {
   margin:1em 0em 1em 0em;
   display:block;
   margin:auto;

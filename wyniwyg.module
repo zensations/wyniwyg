@@ -108,7 +108,6 @@ function wyniwyg_insert_image($matches) {
     }
     $token = strtok(' ,');
   }
-  $classes_str = implode(' ', $classes);
   $file = file_load($matches['fid']);
   $image = image_load($file->uri);
   if (empty($file) || empty($image)) {
@@ -132,14 +131,13 @@ function wyniwyg_insert_image($matches) {
       $original = FALSE;
     }
   }
-  $classes[] = 'wyniwyg-image';
+  $classes[] = 'image';
   $result = theme('image_style', array(
     'style_name' => $style,
     'path' => $path,
     'alt' => $matches['alt'],
     'title' => $matches['title'],
     'attributes' => array(
-      'class' => $classes,
       'id' => 'wyniwyg-' . $file->fid, 
     ),
   ));
@@ -153,8 +151,13 @@ function wyniwyg_insert_image($matches) {
     ));
   }
   if (strlen(trim($matches['title'])) > 0) {
-    $result = '<div class="wyniwyg-figure">' . $result . '<div class="wyniwyg-caption">' . $matches['title'] . '</div></div>';
+    $result = $result . '<div class="wyniwyg-caption">' . $matches['title'] . '</div>';
+    $classes[] = 'with-caption';
   }
+  foreach (array_keys($classes) as $k) {
+    $classes[$k] = 'wyniwyg-' . $classes[$k];
+  }
+  $result = '<div class="wyniwyg-wrapper ' . implode(' ', $classes) . '"><div class="wyniwyg-figure">' . $result . '</div></div>';
   return $result;
 }
 
