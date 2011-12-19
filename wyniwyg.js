@@ -2,7 +2,7 @@
   Drupal.behaviors.wyniwyg = {
     attach: function(context, settings) {
       // === external links ===
-      $('a').click(function() {
+      $('a', context).once().click(function() {
         if (($(this).attr('href').indexOf('http://') > -1) && ($(this).attr('href').indexOf(window.location.host) == -1)) {
           window.open($(this).attr('href'));
           return false;
